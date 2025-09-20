@@ -58,7 +58,7 @@ class StoryView extends StatefulWidget {
 
   final bool isRtl;
 
-  final Widget? headerWidget;
+  final EdgeInsetsGeometry buttonPadding;
 
   StoryView({
     required this.storyItems,
@@ -73,7 +73,7 @@ class StoryView extends StatefulWidget {
     this.indicatorColor,
     this.indicatorForegroundColor,
     this.indicatorHeight = 5,
-    this.headerWidget,
+    this.buttonPadding = EdgeInsets.zero,
     this.indicatorOuterPadding = const EdgeInsets.symmetric(
       horizontal: 16,
       vertical: 8,
@@ -207,8 +207,10 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   }
 
   void _beginPlay() {
-    setState(() {});
-    _play();
+    if (mounted) {
+      setState(() {});
+      _play();
+    }
   }
 
   void _onComplete() {
@@ -317,7 +319,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
             ),
           ),
 
-          SafeArea(
+          Padding(
+            padding: widget.buttonPadding,
             child: Align(
               alignment: Alignment.centerRight,
               heightFactor: 1,
@@ -375,7 +378,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
             ),
           ),
 
-          SafeArea(
+          Padding(
+            padding: widget.buttonPadding,
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               heightFactor: 1,
@@ -400,9 +404,6 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
               ),
             ),
           ),
-
-          if (widget.headerWidget != null)
-            SafeArea(child: widget.headerWidget!),
         ],
       ),
     );

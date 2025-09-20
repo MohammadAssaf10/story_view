@@ -22,7 +22,6 @@ class _StoriesPageState extends State<StoriesPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: StoryView(
-        headerWidget: _buildCaption(),
         storyItems: [
           StoryItem.pageImage(
             url:
