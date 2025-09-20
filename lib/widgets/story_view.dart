@@ -58,6 +58,8 @@ class StoryView extends StatefulWidget {
 
   final bool isRtl;
 
+  final Widget? headerWidget;
+
   StoryView({
     required this.storyItems,
     required this.controller,
@@ -71,6 +73,7 @@ class StoryView extends StatefulWidget {
     this.indicatorColor,
     this.indicatorForegroundColor,
     this.indicatorHeight = 5,
+    this.headerWidget,
     this.indicatorOuterPadding = const EdgeInsets.symmetric(
       horizontal: 16,
       vertical: 8,
@@ -99,14 +102,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   Widget get _currentView {
     StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
     item ??= widget.storyItems.last;
-    final StoryItemType type = item!.type;
-    if (type == StoryItemType.video) {
-      _getVideoDuration(item);
-    }
-    return item.view;
+    return item!.view;
   }
-
-  void _getVideoDuration(StoryItem item) async {}
 
   @override
   void initState() {
@@ -299,9 +296,9 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
               alignment: widget.progressPosition == ProgressPosition.top
                   ? Alignment.topCenter
                   : Alignment.bottomCenter,
+              // we use SafeArea here for notched and bezeles phones
               child: SafeArea(
                 bottom: widget.inline ? false : true,
-                // we use SafeArea here for notched and bezeles phones
                 child: Container(
                   padding: widget.indicatorOuterPadding,
                   child: PageBar(
@@ -319,66 +316,11 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            heightFactor: 1,
-            child: GestureDetector(
-              onTapDown: (details) {
-                widget.controller.pause();
-              },
-              onTapCancel: () {
-                widget.controller.play();
-              },
-              onTapUp: (details) {
-                // if debounce timed out (not active) then continue anim
-                if (_nextDebouncer?.isActive == false) {
-                  widget.controller.play();
-                } else {
-                  widget.controller.next();
-                }
-              },
-              onVerticalDragStart: widget.onVerticalSwipeComplete == null
-                  ? null
-                  : (details) {
-                      widget.controller.pause();
-                    },
-              onVerticalDragCancel: widget.onVerticalSwipeComplete == null
-                  ? null
-                  : () {
-                      widget.controller.play();
-                    },
-              onVerticalDragUpdate: widget.onVerticalSwipeComplete == null
-                  ? null
-                  : (details) {
-                      if (verticalDragInfo == null) {
-                        verticalDragInfo = VerticalDragInfo();
-                      }
 
-                      verticalDragInfo!.update(details.primaryDelta!);
-
-                      // TODO: provide callback interface for animation purposes
-                    },
-              onVerticalDragEnd: widget.onVerticalSwipeComplete == null
-                  ? null
-                  : (details) {
-                      widget.controller.play();
-                      // finish up drag cycle
-                      if (!verticalDragInfo!.cancel &&
-                          widget.onVerticalSwipeComplete != null) {
-                        widget.onVerticalSwipeComplete!(
-                          verticalDragInfo!.direction,
-                        );
-                      }
-
-                      verticalDragInfo = null;
-                    },
-            ),
-          ),
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            heightFactor: 1,
-            child: SizedBox(
-              width: MediaQuery.sizeOf(context).width * 0.5,
+          SafeArea(
+            child: Align(
+              alignment: Alignment.centerRight,
+              heightFactor: 1,
               child: GestureDetector(
                 onTapDown: (details) {
                   widget.controller.pause();
@@ -391,12 +333,76 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                   if (_nextDebouncer?.isActive == false) {
                     widget.controller.play();
                   } else {
-                    widget.controller.previous();
+                    widget.controller.next();
                   }
                 },
+                onVerticalDragStart: widget.onVerticalSwipeComplete == null
+                    ? null
+                    : (details) {
+                        widget.controller.pause();
+                      },
+                onVerticalDragCancel: widget.onVerticalSwipeComplete == null
+                    ? null
+                    : () {
+                        widget.controller.play();
+                      },
+                onVerticalDragUpdate: widget.onVerticalSwipeComplete == null
+                    ? null
+                    : (details) {
+                        if (verticalDragInfo == null) {
+                          verticalDragInfo = VerticalDragInfo();
+                        }
+
+                        verticalDragInfo!.update(details.primaryDelta!);
+
+                        // TODO: provide callback interface for animation purposes
+                      },
+                onVerticalDragEnd: widget.onVerticalSwipeComplete == null
+                    ? null
+                    : (details) {
+                        widget.controller.play();
+                        // finish up drag cycle
+                        if (!verticalDragInfo!.cancel &&
+                            widget.onVerticalSwipeComplete != null) {
+                          widget.onVerticalSwipeComplete!(
+                            verticalDragInfo!.direction,
+                          );
+                        }
+
+                        verticalDragInfo = null;
+                      },
               ),
             ),
           ),
+
+          SafeArea(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              heightFactor: 1,
+              child: SizedBox(
+                width: MediaQuery.sizeOf(context).width * 0.5,
+                child: GestureDetector(
+                  onTapDown: (details) {
+                    widget.controller.pause();
+                  },
+                  onTapCancel: () {
+                    widget.controller.play();
+                  },
+                  onTapUp: (details) {
+                    // if debounce timed out (not active) then continue anim
+                    if (_nextDebouncer?.isActive == false) {
+                      widget.controller.play();
+                    } else {
+                      widget.controller.previous();
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          if (widget.headerWidget != null)
+            SafeArea(child: widget.headerWidget!),
         ],
       ),
     );
