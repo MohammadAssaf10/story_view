@@ -1,6 +1,4 @@
-enum LoadState { loading, success, failure }
-
-enum Direction { up, down, left, right }
+import 'enum.dart';
 
 class VerticalDragInfo {
   bool cancel = false;
