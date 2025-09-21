@@ -100,8 +100,10 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
   VerticalDragInfo? verticalDragInfo;
 
-  StoryItem? get _currentStory {
-    return widget.storyItems.firstWhereOrNull((it) => !it!.shown);
+  StoryItem get _currentStory {
+    StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
+    item ??= widget.storyItems.first;
+    return item!;
   }
 
   Widget get _currentView {
@@ -213,10 +215,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   }
 
   void _beginPlay() {
-    if (mounted) {
-      setState(() {});
-      _play();
-    }
+    setState(() {});
+    _play();
   }
 
   void _onComplete() {
@@ -237,18 +237,14 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   void _goBack() {
     _animationController!.stop();
 
-    if (this._currentStory == null) {
-      widget.storyItems.last!.shown = false;
-    }
-
     if (this._currentStory == widget.storyItems.first) {
       if (widget.onPressPrev != null) {
+        widget.controller.pause();
         widget.onPressPrev!.call();
-      } else {
-        _beginPlay();
       }
+      _beginPlay();
     } else {
-      this._currentStory!.shown = false;
+      this._currentStory.shown = false;
       int lastPos = widget.storyItems.indexOf(this._currentStory);
       final previous = widget.storyItems[lastPos - 1]!;
 
@@ -265,11 +261,9 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       // get last showing
       final _last = this._currentStory;
 
-      if (_last != null) {
-        _last.shown = true;
-        if (_last != widget.storyItems.last) {
-          _beginPlay();
-        }
+      _last.shown = true;
+      if (_last != widget.storyItems.last) {
+        _beginPlay();
       }
     } else {
       // this is the last page, progress animation should skip to end
