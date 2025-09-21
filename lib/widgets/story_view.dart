@@ -56,9 +56,13 @@ class StoryView extends StatefulWidget {
   /// Use this if you want to give outer padding to the indicator
   final EdgeInsetsGeometry indicatorOuterPadding;
 
+  /// Use this if you want to display the story in a right to left language
   final bool isRtl;
 
+  /// Use this if you want to give padding to the buttons
   final EdgeInsetsGeometry buttonPadding;
+
+  final void Function()? onPressPrev;
 
   StoryView({
     required this.storyItems,
@@ -72,6 +76,7 @@ class StoryView extends StatefulWidget {
     this.onVerticalSwipeComplete,
     this.indicatorColor,
     this.indicatorForegroundColor,
+    this.onPressPrev,
     this.indicatorHeight = 5,
     this.buttonPadding = EdgeInsets.zero,
     this.indicatorOuterPadding = const EdgeInsets.symmetric(
@@ -236,7 +241,11 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     }
 
     if (this._currentStory == widget.storyItems.first) {
-      _beginPlay();
+      if (widget.onPressPrev != null) {
+        widget.onPressPrev!.call();
+      } else {
+        _beginPlay();
+      }
     } else {
       this._currentStory!.shown = false;
       int lastPos = widget.storyItems.indexOf(this._currentStory);
