@@ -239,10 +239,11 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     if (this._currentStory == widget.storyItems.first) {
       if (widget.onPressPrev != null) {
-        widget.controller.pause();
         widget.onPressPrev!.call();
+        _play();
+      } else {
+        _beginPlay();
       }
-      _beginPlay();
     } else {
       this._currentStory.shown = false;
       int lastPos = widget.storyItems.indexOf(this._currentStory);
