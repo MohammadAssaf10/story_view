@@ -100,15 +100,13 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
   VerticalDragInfo? verticalDragInfo;
 
-  StoryItem get _currentStory {
-    StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
-    item ??= widget.storyItems.first;
-    return item!;
+  StoryItem? get _currentStory {
+    return widget.storyItems.firstWhereOrNull((it) => !it!.shown);
   }
 
   Widget get _currentView {
     StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
-    item ??= widget.storyItems.first;
+    item ??= widget.storyItems.last;
     return item?.view ?? SizedBox.shrink();
   }
 
@@ -155,7 +153,9 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       }
     });
 
-    _play();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _play();
+    });
   }
 
   @override
@@ -178,25 +178,24 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   void _play() {
     _animationController?.dispose();
     // get the next playing page
-    StoryItem? storyItem = widget.storyItems.firstWhereOrNull((it) {
+    final StoryItem storyItem = widget.storyItems.firstWhere((it) {
       return !it!.shown;
-    });
-    storyItem ??= widget.storyItems.first;
+    })!;
 
     final int storyItemIndex = widget.storyItems.indexOf(storyItem);
 
     if (widget.onStoryShow != null) {
-      widget.onStoryShow!(storyItem!, storyItemIndex);
+      widget.onStoryShow!(storyItem, storyItemIndex);
     }
 
     _animationController = AnimationController(
-      duration: storyItem!.duration,
+      duration: storyItem.duration,
       vsync: this,
     );
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        storyItem!.shown = true;
+        storyItem.shown = true;
         if (widget.storyItems.last != storyItem) {
           _beginPlay();
         } else {
@@ -245,7 +244,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
         _beginPlay();
       }
     } else {
-      this._currentStory.shown = false;
+      this._currentStory!.shown = false;
       int lastPos = widget.storyItems.indexOf(this._currentStory);
       final previous = widget.storyItems[lastPos - 1]!;
 
@@ -262,9 +261,11 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       // get last showing
       final _last = this._currentStory;
 
-      _last.shown = true;
-      if (_last != widget.storyItems.last) {
-        _beginPlay();
+      if (_last != null) {
+        _last.shown = true;
+        if (_last != widget.storyItems.last) {
+          _beginPlay();
+        }
       }
     } else {
       // this is the last page, progress animation should skip to end
