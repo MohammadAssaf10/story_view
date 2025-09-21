@@ -107,7 +107,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   Widget get _currentView {
     StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
     item ??= widget.storyItems.last;
-    return item!.view;
+    return item?.view ?? SizedBox.shrink();
   }
 
   @override
@@ -176,24 +176,25 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   void _play() {
     _animationController?.dispose();
     // get the next playing page
-    final storyItem = widget.storyItems.firstWhere((it) {
+    StoryItem? storyItem = widget.storyItems.firstWhereOrNull((it) {
       return !it!.shown;
-    })!;
+    });
+    storyItem ??= widget.storyItems.last;
 
     final storyItemIndex = widget.storyItems.indexOf(storyItem);
 
     if (widget.onStoryShow != null) {
-      widget.onStoryShow!(storyItem, storyItemIndex);
+      widget.onStoryShow!(storyItem!, storyItemIndex);
     }
 
     _animationController = AnimationController(
-      duration: storyItem.duration,
+      duration: storyItem!.duration,
       vsync: this,
     );
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        storyItem.shown = true;
+        storyItem!.shown = true;
         if (widget.storyItems.last != storyItem) {
           _beginPlay();
         } else {

@@ -79,7 +79,7 @@ class StoryVideoState extends State<StoryVideo> {
 
           playerController!.addEventsListener((event) {
             if (event.betterPlayerEventType ==
-                BetterPlayerEventType.initialized) {
+                BetterPlayerEventType.initialized && mounted) {
               setState(() {});
               widget.storyController!.play();
             }
