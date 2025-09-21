@@ -106,7 +106,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
   Widget get _currentView {
     StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
-    item ??= widget.storyItems.last;
+    item ??= widget.storyItems.first;
     return item?.view ?? SizedBox.shrink();
   }
 
@@ -179,9 +179,9 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     StoryItem? storyItem = widget.storyItems.firstWhereOrNull((it) {
       return !it!.shown;
     });
-    storyItem ??= widget.storyItems.last;
+    storyItem ??= widget.storyItems.first;
 
-    final storyItemIndex = widget.storyItems.indexOf(storyItem);
+    final int storyItemIndex = widget.storyItems.indexOf(storyItem);
 
     if (widget.onStoryShow != null) {
       widget.onStoryShow!(storyItem!, storyItemIndex);
