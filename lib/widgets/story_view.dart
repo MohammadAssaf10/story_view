@@ -62,7 +62,7 @@ class StoryView extends StatefulWidget {
   /// Use this if you want to give padding to the buttons
   final EdgeInsetsGeometry buttonPadding;
 
-  final void Function()? onPressPrev;
+  final void Function()? onMoveToPreviousPage;
 
   StoryView({
     required this.storyItems,
@@ -76,7 +76,7 @@ class StoryView extends StatefulWidget {
     this.onVerticalSwipeComplete,
     this.indicatorColor,
     this.indicatorForegroundColor,
-    this.onPressPrev,
+    this.onMoveToPreviousPage,
     this.indicatorHeight = 5,
     this.buttonPadding = EdgeInsets.zero,
     this.indicatorOuterPadding = const EdgeInsets.symmetric(
@@ -181,7 +181,6 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       (it) => !it.shown,
     );
     storyItem ??= widget.storyItems.first;
-    storyItem.shown = true;
 
     final int storyItemIndex = widget.storyItems.indexOf(storyItem);
 
@@ -196,6 +195,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
+        storyItem!.shown = true;
         if (widget.storyItems.last != storyItem) {
           _beginPlay();
         } else {
@@ -237,9 +237,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     _animationController!.stop();
 
     if (this._currentStory == widget.storyItems.first) {
-      if (widget.onPressPrev != null) {
-        widget.onPressPrev!.call();
-        _play();
+      if (widget.onMoveToPreviousPage != null) {
+        widget.onMoveToPreviousPage!.call();
       } else {
         _beginPlay();
       }
