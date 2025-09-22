@@ -152,10 +152,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
           break;
       }
     });
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _play();
-    });
+    _play();
   }
 
   @override
