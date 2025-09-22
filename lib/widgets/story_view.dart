@@ -15,7 +15,7 @@ import 'story_item.dart';
 /// gestures to pause, forward and go to previous page.
 class StoryView extends StatefulWidget {
   /// The pages to displayed.
-  final List<StoryItem?> storyItems;
+  final List<StoryItem> storyItems;
 
   /// Callback for when a full cycle of story is shown. This will be called
   /// each time the full story completes when [repeat] is set to `true`.
@@ -100,14 +100,16 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
   VerticalDragInfo? verticalDragInfo;
 
-  StoryItem? get _currentStory {
-    return widget.storyItems.firstWhereOrNull((it) => !it!.shown);
+  StoryItem get _currentStory {
+    StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it.shown);
+    item ??= widget.storyItems.first;
+    return item;
   }
 
   Widget get _currentView {
-    StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
-    item ??= widget.storyItems.last;
-    return item?.view ?? SizedBox.shrink();
+    StoryItem? item = widget.storyItems.firstWhereOrNull((it) => !it.shown);
+    item ??= widget.storyItems.first;
+    return item.view;
   }
 
   @override
@@ -115,15 +117,15 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     super.initState();
     // All pages after the first unshown page should have their shown value as
     // false
-    final firstPage = widget.storyItems.firstWhereOrNull((it) => !it!.shown);
+    final firstPage = widget.storyItems.firstWhereOrNull((it) => !it.shown);
     if (firstPage == null) {
       widget.storyItems.forEach((it2) {
-        it2!.shown = false;
+        it2.shown = false;
       });
     } else {
       final lastShownPos = widget.storyItems.indexOf(firstPage);
       widget.storyItems.sublist(lastShownPos).forEach((it) {
-        it!.shown = false;
+        it.shown = false;
       });
     }
 
@@ -175,9 +177,10 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   void _play() {
     _animationController?.dispose();
     // get the next playing page
-    final StoryItem storyItem = widget.storyItems.firstWhere((it) {
-      return !it!.shown;
-    })!;
+    StoryItem? storyItem = widget.storyItems.firstWhereOrNull(
+      (it) => !it.shown,
+    );
+    storyItem ??= widget.storyItems.first;
 
     final int storyItemIndex = widget.storyItems.indexOf(storyItem);
 
@@ -192,7 +195,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        storyItem.shown = true;
+        storyItem!.shown = true;
         if (widget.storyItems.last != storyItem) {
           _beginPlay();
         } else {
@@ -223,7 +226,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     if (widget.repeat) {
       widget.storyItems.forEach((it) {
-        it!.shown = false;
+        it.shown = false;
       });
 
       _beginPlay();
@@ -241,9 +244,9 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
         _beginPlay();
       }
     } else {
-      this._currentStory!.shown = false;
+      this._currentStory.shown = false;
       int lastPos = widget.storyItems.indexOf(this._currentStory);
-      final previous = widget.storyItems[lastPos - 1]!;
+      final previous = widget.storyItems[lastPos - 1];
 
       previous.shown = false;
 
@@ -258,11 +261,9 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       // get last showing
       final _last = this._currentStory;
 
-      if (_last != null) {
-        _last.shown = true;
-        if (_last != widget.storyItems.last) {
-          _beginPlay();
-        }
+      _last.shown = true;
+      if (_last != widget.storyItems.last) {
+        _beginPlay();
       }
     } else {
       // this is the last page, progress animation should skip to end
@@ -308,7 +309,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                   padding: widget.indicatorOuterPadding,
                   child: PageBar(
                     widget.storyItems
-                        .map((it) => PageData(it!.duration, it.shown))
+                        .map((it) => PageData(it.duration, it.shown))
                         .toList(),
                     this._currentAnimation,
                     key: UniqueKey(),
