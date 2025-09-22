@@ -181,6 +181,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       (it) => !it.shown,
     );
     storyItem ??= widget.storyItems.first;
+    storyItem.shown = true;
 
     final int storyItemIndex = widget.storyItems.indexOf(storyItem);
 
@@ -195,7 +196,6 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     _animationController!.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        storyItem!.shown = true;
         if (widget.storyItems.last != storyItem) {
           _beginPlay();
         } else {
