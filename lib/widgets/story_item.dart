@@ -105,13 +105,11 @@ class StoryItem {
     Key? key,
     BoxFit imageFit = BoxFit.fitWidth,
     Widget? caption,
-    Alignment? captionAlignment,
+    Widget? header,
     bool shown = false,
     Map<String, dynamic>? requestHeaders,
     Widget? loadingWidget,
     Widget? errorWidget,
-    EdgeInsetsGeometry? captionOuterPadding,
-    EdgeInsetsGeometry? captionOuterMargin,
     Duration? duration,
   }) {
     return StoryItem(
@@ -128,19 +126,14 @@ class StoryItem {
               loadingWidget: loadingWidget,
               errorWidget: errorWidget,
             ),
-            SafeArea(
-              child: Align(
-                alignment: captionAlignment ?? Alignment.bottomCenter,
-                child: Container(
-                  width: double.infinity,
-                  margin: captionOuterMargin ?? EdgeInsets.only(bottom: 24),
-                  padding:
-                      captionOuterPadding ??
-                      EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: caption ?? const SizedBox.shrink(),
-                ),
+            if (caption != null)
+              SafeArea(
+                child: Align(alignment: Alignment.bottomCenter, child: caption),
               ),
-            ),
+            if (header != null)
+              SafeArea(
+                child: Align(alignment: Alignment.topCenter, child: header),
+              ),
           ],
         ),
       ),
@@ -156,7 +149,7 @@ class StoryItem {
   factory StoryItem.inlineImage({
     required String url,
     Widget? caption,
-    Alignment? captionAlignment,
+    Widget? header,
     required StoryController controller,
     Key? key,
     BoxFit imageFit = BoxFit.cover,
@@ -166,8 +159,6 @@ class StoryItem {
     bool roundedBottom = false,
     Widget? loadingWidget,
     Widget? errorWidget,
-    EdgeInsetsGeometry? captionOuterPadding,
-    EdgeInsetsGeometry? captionOuterMargin,
     Duration? duration,
   }) {
     return StoryItem(
@@ -187,19 +178,10 @@ class StoryItem {
                   loadingWidget: loadingWidget,
                   errorWidget: errorWidget,
                 ),
-                Container(
-                  margin: captionOuterMargin ?? EdgeInsets.only(bottom: 16),
-                  padding:
-                      captionOuterPadding ??
-                      EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: Align(
-                    alignment: captionAlignment ?? Alignment.bottomLeft,
-                    child: Container(
-                      child: caption ?? const SizedBox.shrink(),
-                      width: double.infinity,
-                    ),
-                  ),
-                ),
+                if (caption != null)
+                  Align(alignment: Alignment.bottomCenter, child: caption),
+                if (header != null)
+                  Align(alignment: Alignment.bottomCenter, child: header),
               ],
             ),
           ),
@@ -225,9 +207,7 @@ class StoryItem {
     Key? key,
     BoxFit imageFit = BoxFit.fitWidth,
     Widget? caption,
-    Alignment? captionAlignment,
-    EdgeInsetsGeometry? captionOuterMargin,
-    EdgeInsetsGeometry? captionOuterPadding,
+    Widget? header,
     bool shown = false,
     Map<String, dynamic>? requestHeaders,
     Widget? loadingWidget,
@@ -246,19 +226,14 @@ class StoryItem {
               loadingWidget: loadingWidget,
               errorWidget: errorWidget,
             ),
-            SafeArea(
-              child: Align(
-                alignment: captionAlignment ?? Alignment.bottomCenter,
-                child: Container(
-                  width: double.infinity,
-                  margin: captionOuterMargin ?? EdgeInsets.only(bottom: 24),
-                  padding:
-                      captionOuterPadding ??
-                      EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: caption ?? const SizedBox.shrink(),
-                ),
+            if (caption != null)
+              SafeArea(
+                child: Align(alignment: Alignment.bottomCenter, child: caption),
               ),
-            ),
+            if (header != null)
+              SafeArea(
+                child: Align(alignment: Alignment.bottomCenter, child: header),
+              ),
           ],
         ),
       ),
