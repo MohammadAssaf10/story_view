@@ -181,7 +181,7 @@ class StoryItem {
                 if (caption != null)
                   Align(alignment: Alignment.bottomCenter, child: caption),
                 if (header != null)
-                  Align(alignment: Alignment.bottomCenter, child: header),
+                  Align(alignment: Alignment.topCenter, child: header),
               ],
             ),
           ),
@@ -232,7 +232,7 @@ class StoryItem {
               ),
             if (header != null)
               SafeArea(
-                child: Align(alignment: Alignment.bottomCenter, child: header),
+                child: Align(alignment: Alignment.topCenter, child: header),
               ),
           ],
         ),
