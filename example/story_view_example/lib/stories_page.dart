@@ -48,19 +48,4 @@ class _StoriesPageState extends State<StoriesPage> {
       ),
     );
   }
-
-  Widget _buildCaption() {
-    return GestureDetector(
-      onTap: () {
-        debugPrint('Click on caption');
-      },
-      child: Container(
-        height: 50,
-        width: double.infinity,
-        margin: EdgeInsetsDirectional.only(top: 60, start: 20),
-        color: Colors.teal,
-        child: Text('Next'),
-      ),
-    );
-  }
 }
