@@ -21,10 +21,10 @@ packages:
     dependency: "direct main"
     description:
       name: better_player_plus
-      sha256: "3e827b9aaf116e92f19312f2ec992e8124f8c7ca3fadeb44eebb687397d4fd65"
+      sha256: "6f571f00645eeca7dea6b20cd35482c0d109ab779c4b4057d178d7afd50a6222"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "1.1.2"
   characters:
     dependency: transitive
     description:
