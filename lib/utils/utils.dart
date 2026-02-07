@@ -1,5 +1,7 @@
 import 'enum.dart';
 
+const Duration defaultStoryDuration = Duration(seconds: 3);
+
 class VerticalDragInfo {
   bool cancel = false;
 

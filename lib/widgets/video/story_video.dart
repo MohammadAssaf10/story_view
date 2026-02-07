@@ -78,7 +78,7 @@ class _StoryVideoState extends State<StoryVideo> {
   void _onLoadSuccess() {
     if (!mounted) return;
 
-    if (widget.videoLoader.state == LoadState.success) {
+    if (widget.videoLoader.state == LoadStatus.success) {
       initializeVideo();
       // Setup Story Controller Listener
       _setupStoryListener();
@@ -88,7 +88,7 @@ class _StoryVideoState extends State<StoryVideo> {
   }
 
   Future<void> initializeVideo() async {
-    if (widget.videoLoader.state != LoadState.success) return;
+    if (widget.videoLoader.state != LoadStatus.success) return;
     final file = widget.videoLoader.videoFile;
 
     if (file == null) {
