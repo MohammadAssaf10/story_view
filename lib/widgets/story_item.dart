@@ -9,8 +9,8 @@ class StoryItem {
   final StoryItemType type;
   final String url;
 
-  StoryItem(
-    this.view, {
+  StoryItem({
+    required this.view,
     required this.storyDuration,
     required this.type,
     required this.url,
@@ -32,7 +32,7 @@ class StoryItem {
     final Color textColor = isDark ? Colors.white : Colors.black;
 
     return StoryItem(
-      Container(
+      view: Container(
         key: key,
         decoration: BoxDecoration(
           color: backgroundColor,
@@ -61,7 +61,7 @@ class StoryItem {
     );
   }
 
-  factory StoryItem.pageImage({
+  factory StoryItem.image({
     required String url,
     required StoryController controller,
     Key? key,
@@ -72,24 +72,25 @@ class StoryItem {
     Map<String, String>? requestHeaders,
     Widget? loadingWidget,
     Widget? errorWidget,
-    Duration? storyDuration,
+    Duration storyDuration = defaultStoryDuration,
   }) {
     return StoryItem(
-      _buildStoryView(
+      view: _buildStoryView(
         caption: caption,
         header: header,
-        child: StoryImage.url(
-          url,
+        child: StoryImage(
           key: key,
+          imageUrl: url,
           controller: controller,
           fit: imageFit,
+          loader: loadingWidget,
+          errorView: errorWidget,
+          storyDuration: storyDuration,
           requestHeaders: requestHeaders,
-          loadingWidget: loadingWidget,
-          errorWidget: errorWidget,
         ),
       ),
       isSeenBefore: isSeenBefore,
-      storyDuration: storyDuration ?? const Duration(seconds: 3),
+      storyDuration: storyDuration,
       type: StoryItemType.image,
       url: url,
     );
@@ -108,7 +109,7 @@ class StoryItem {
     Widget? errorWidget,
   }) {
     return StoryItem(
-      _buildStoryView(
+      view: _buildStoryView(
         caption: caption,
         header: header,
         child: StoryVideo.url(

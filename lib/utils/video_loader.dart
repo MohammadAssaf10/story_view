@@ -11,7 +11,7 @@ class VideoLoader {
   final Map<String, String>? requestHeaders;
 
   File? videoFile;
-  LoadState state = LoadState.loading;
+  LoadStatus state = LoadStatus.loading;
 
   StreamSubscription<FileResponse>? _subscription;
 
@@ -20,11 +20,11 @@ class VideoLoader {
   void loadVideo(VoidCallback onComplete, {VoidCallback? onLoading}) {
     // 1. Notify loading state
     onLoading?.call();
-    state = LoadState.loading;
+    state = LoadStatus.loading;
 
     // 2. Check if already loaded
     if (videoFile != null) {
-      state = LoadState.success;
+      state = LoadStatus.success;
       onComplete();
       return; // Important: Stop execution here if already loaded
     }
@@ -43,24 +43,24 @@ class VideoLoader {
           if (fileResponse is FileInfo) {
             if (videoFile == null) {
               videoFile = fileResponse.file;
-              state = LoadState.success;
+              state = LoadStatus.success;
               onComplete();
             }
           }
         },
         onError: (error) {
-          state = LoadState.failure;
+          state = LoadStatus.failure;
           // You might want to add an onError callback parameter to loadVideo
           // to notify the UI of the failure.
         },
       );
     } catch (e) {
-      state = LoadState.failure;
+      state = LoadStatus.failure;
     }
   }
 
   void showLoading() {
-    state = LoadState.loading;
+    state = LoadStatus.loading;
   }
 
   /// Cancel active downloads/listeners to prevent memory leaks

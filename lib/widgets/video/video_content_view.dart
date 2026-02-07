@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../utils/enum.dart';
 
 class VideoContentView extends StatelessWidget {
-  final LoadState videoLoadState;
+  final LoadStatus videoLoadState;
   final BetterPlayerController playerController;
   final Widget? loadingWidget;
   final Widget? errorWidget;
@@ -19,7 +19,7 @@ class VideoContentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (videoLoadState == LoadState.success &&
+    if (videoLoadState == LoadStatus.success &&
         playerController.videoPlayerController!.value.initialized) {
       return Center(
         child: AspectRatio(
@@ -28,7 +28,7 @@ class VideoContentView extends StatelessWidget {
           child: BetterPlayer(controller: playerController),
         ),
       );
-    } else if (videoLoadState == LoadState.loading) {
+    } else if (videoLoadState == LoadStatus.loading) {
       return Center(
         child:
             loadingWidget ??
@@ -41,7 +41,7 @@ class VideoContentView extends StatelessWidget {
               ),
             ),
       );
-    } else if (videoLoadState == LoadState.failure) {
+    } else if (videoLoadState == LoadStatus.failure) {
       return Center(
         child:
             errorWidget ??

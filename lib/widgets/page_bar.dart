@@ -31,7 +31,7 @@ class PageBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = _getSpacing(pages.length);
-    
+
     // Find the index of the first page that hasn't been shown yet.
     // If all are shown, -1 indicates the story is complete.
     final activeIndex = pages.indexWhere((it) => !it.shown);
