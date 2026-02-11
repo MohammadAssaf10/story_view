@@ -40,15 +40,7 @@ class VideoContentView extends StatelessWidget {
         );
       case LoadStatus.success:
         return _isPlayerReady
-            ? Center(
-                child: AspectRatio(
-                  aspectRatio: playerController!
-                      .videoPlayerController!
-                      .value
-                      .aspectRatio,
-                  child: BetterPlayer(controller: playerController!),
-                ),
-              )
+            ? Center(child: BetterPlayer(controller: playerController!))
             : SizedBox.shrink();
       case LoadStatus.failure:
         return Center(

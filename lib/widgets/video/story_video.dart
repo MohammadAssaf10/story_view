@@ -48,9 +48,7 @@ class _StoryVideoState extends State<StoryVideo> {
         _setupStoryListener();
       },
       onError: () {
-        setState(() {
-          widget.storyController.next();
-        });
+        setState(() {});
       },
       storyController: widget.storyController,
       storyDuration: widget.storyDuration,
@@ -71,8 +69,9 @@ class _StoryVideoState extends State<StoryVideo> {
         const BetterPlayerConfiguration(
           autoPlay: false,
           autoDispose: false,
-          fit: BoxFit.fitWidth,
-          // aspectRatio: 0.1,
+          fit: BoxFit.contain,
+          aspectRatio: 9 / 16,
+          allowedScreenSleep: false,
           controlsConfiguration: BetterPlayerControlsConfiguration(
             showControls: false,
           ),
