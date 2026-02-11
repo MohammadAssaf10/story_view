@@ -5,6 +5,14 @@ A Flutter package that lets you easily create beautiful, interactive story views
 [![pub package](https://img.shields.io/pub/v/story_view.svg)](https://pub.dev/packages/story_view)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/android.png" width="300" alt="Android Screenshot"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/iOS.png" width="300" alt="iOS Screenshot"/>
+</p>
+
 ## Features
 
 - 📱 **Instagram-like Stories**: Create engaging story views with images and videos
