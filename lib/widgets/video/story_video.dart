@@ -1,43 +1,29 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 
-import '../../controller/story_controller.dart';
-import '../../utils/enum.dart';
-import '../../utils/video_loader.dart';
+import '../../story_view.dart';
 import 'video_content_view.dart';
 
 class StoryVideo extends StatefulWidget {
-  final StoryController? storyController;
-  final VideoLoader videoLoader;
-  final Widget? loadingWidget;
-  final Widget? errorWidget;
+  final String videoUrl;
+  final StoryController storyController;
+  final Widget? loader;
+  final Widget? errorView;
+  final Duration storyDuration;
+  final Map<String, String>? requestHeaders;
 
-  const StoryVideo(
-    this.videoLoader, {
+  const StoryVideo({
     super.key,
-    this.storyController,
-    this.loadingWidget,
-    this.errorWidget,
+    required this.videoUrl,
+    required this.storyController,
+    required this.storyDuration,
+    required this.loader,
+    required this.errorView,
+    required this.requestHeaders,
   });
-
-  factory StoryVideo.url(
-    String url, {
-    StoryController? controller,
-    Map<String, String>? requestHeaders,
-    Key? key,
-    Widget? loadingWidget,
-    Widget? errorWidget,
-  }) {
-    return StoryVideo(
-      VideoLoader(url, requestHeaders: requestHeaders),
-      storyController: controller,
-      key: key,
-      loadingWidget: loadingWidget,
-      errorWidget: errorWidget,
-    );
-  }
 
   @override
   State<StoryVideo> createState() => _StoryVideoState();
@@ -46,50 +32,35 @@ class StoryVideo extends StatefulWidget {
 class _StoryVideoState extends State<StoryVideo> {
   StreamSubscription<PlaybackState>? _streamSubscription;
   BetterPlayerController? _videoPlayerController;
+  late final MediaLoader _videoLoader;
 
   @override
   void initState() {
     super.initState();
-    widget.storyController?.pause();
-    _loadVideo();
+
+    /// Pause the story initially to ensure the video is fully loaded and ready before playback starts.
+    widget.storyController.pause();
+    _videoLoader = MediaLoader(
+      mediaUrl: widget.videoUrl,
+      onLoaded: () {
+        if (!mounted) return;
+        _initializeVideo();
+        _setupStoryListener();
+      },
+      onError: () {
+        setState(() {
+          widget.storyController.next();
+        });
+      },
+      storyController: widget.storyController,
+      storyDuration: widget.storyDuration,
+      requestHeaders: widget.requestHeaders,
+    );
   }
 
-  @override
-  void dispose() {
-    widget.videoLoader.dispose();
-    _streamSubscription?.cancel();
-    _videoPlayerController?.pause();
-    _videoPlayerController?.dispose();
-    super.dispose();
-  }
-
-  void _loadVideo() {
-    widget.videoLoader.loadVideo(_onLoadSuccess, onLoading: _onLoading);
-  }
-
-  void _onLoading() {
-    if (mounted) {
-      setState(() {
-        widget.videoLoader.showLoading();
-      });
-    }
-  }
-
-  void _onLoadSuccess() {
-    if (!mounted) return;
-
-    if (widget.videoLoader.state == LoadStatus.success) {
-      initializeVideo();
-      // Setup Story Controller Listener
-      _setupStoryListener();
-    } else {
-      setState(() {});
-    }
-  }
-
-  Future<void> initializeVideo() async {
-    if (widget.videoLoader.state != LoadStatus.success) return;
-    final file = widget.videoLoader.videoFile;
+  Future<void> _initializeVideo() async {
+    if (_videoLoader.status != LoadStatus.success) return;
+    final File? file = _videoLoader.mediaFile;
 
     if (file == null) {
       setState(() {});
@@ -100,8 +71,8 @@ class _StoryVideoState extends State<StoryVideo> {
         const BetterPlayerConfiguration(
           autoPlay: false,
           autoDispose: false,
-          fit: BoxFit.contain,
-          aspectRatio: 0.1,
+          fit: BoxFit.fitWidth,
+          // aspectRatio: 0.1,
           controlsConfiguration: BetterPlayerControlsConfiguration(
             showControls: false,
           ),
@@ -117,50 +88,47 @@ class _StoryVideoState extends State<StoryVideo> {
     await _videoPlayerController!.setupDataSource(dataSource);
 
     if (mounted) {
-      setState(() {});
-      widget.storyController?.play();
-      _videoPlayerController!.play();
+      setState(() {
+        widget.storyController.play();
+        _videoPlayerController!.play();
+      });
     }
   }
 
   void _setupStoryListener() {
-    if (widget.storyController == null) return;
+    _streamSubscription = widget.storyController.playbackNotifier.listen(
+      _storyListener,
+    );
+  }
 
-    _streamSubscription = widget.storyController!.playbackNotifier.listen((
-      playbackState,
-    ) {
-      if (_videoPlayerController == null) return;
+  void _storyListener(PlaybackState playbackState) {
+    if (_videoPlayerController == null) return;
 
-      if (playbackState == PlaybackState.pause) {
-        _videoPlayerController!.pause();
-      } else if (playbackState == PlaybackState.play) {
-        _videoPlayerController!.play();
-      }
-    });
+    if (playbackState == PlaybackState.pause) {
+      _videoPlayerController!.pause();
+    } else if (playbackState == PlaybackState.play) {
+      _videoPlayerController!.play();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: _videoPlayerController == null
-          ? widget.loadingWidget ??
-                const SizedBox(
-                  width: 70,
-                  height: 70,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 3,
-                  ),
-                )
-          : ColoredBox(
-              color: Colors.black,
-              child: VideoContentView(
-                videoLoadState: widget.videoLoader.state,
-                playerController: _videoPlayerController!,
-                loadingWidget: widget.loadingWidget,
-                errorWidget: widget.errorWidget,
-              ),
-            ),
+      child: VideoContentView(
+        videoLoader: _videoLoader,
+        playerController: _videoPlayerController,
+        loader: widget.loader,
+        errorView: widget.errorView,
+      ),
     );
+  }
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    _videoPlayerController?.pause();
+    _videoPlayerController?.dispose();
+    _videoLoader.dispose();
+    super.dispose();
   }
 }

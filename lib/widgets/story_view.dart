@@ -26,7 +26,6 @@ class StoryView extends StatefulWidget {
   final bool isRtl;
   final EdgeInsetsGeometry buttonPadding;
   final VoidCallback? onMoveToPreviousPage;
-  final VoidCallback? onDoubleTap;
 
   const StoryView({
     super.key,
@@ -36,7 +35,6 @@ class StoryView extends StatefulWidget {
     this.onStoryShow,
     this.onVerticalSwipeComplete,
     this.onMoveToPreviousPage,
-    this.onDoubleTap,
     this.progressPosition = ProgressPosition.top,
     this.repeat = false,
     this.inline = false,
@@ -291,7 +289,6 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onDoubleTap: widget.onDoubleTap,
                     onTapDown: (_) => widget.controller.pause(),
                     onTapCancel: () => widget.controller.play(),
                     onTapUp: (_) {
@@ -307,7 +304,6 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 Expanded(
                   child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
-                    onDoubleTap: widget.onDoubleTap,
                     onTapDown: (_) => widget.controller.pause(),
                     onTapCancel: () => widget.controller.play(),
                     onTapUp: (_) {

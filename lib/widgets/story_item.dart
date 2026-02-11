@@ -96,8 +96,8 @@ class StoryItem {
     );
   }
 
-  factory StoryItem.pageVideo(
-    String url, {
+  factory StoryItem.video({
+    required String url,
     required StoryController controller,
     required Duration storyDuration,
     Key? key,
@@ -112,13 +112,14 @@ class StoryItem {
       view: _buildStoryView(
         caption: caption,
         header: header,
-        child: StoryVideo.url(
-          url,
+        child: StoryVideo(
+          storyController: controller,
           key: key,
-          controller: controller,
+          loader: loadingWidget,
+          errorView: errorWidget,
+          videoUrl: url,
+          storyDuration: storyDuration,
           requestHeaders: requestHeaders,
-          loadingWidget: loadingWidget,
-          errorWidget: errorWidget,
         ),
       ),
       isSeenBefore: isSeenBefore,

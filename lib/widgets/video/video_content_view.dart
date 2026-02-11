@@ -1,56 +1,64 @@
 import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 
-import '../../utils/enum.dart';
+import '../../story_view.dart';
 
 class VideoContentView extends StatelessWidget {
-  final LoadStatus videoLoadState;
-  final BetterPlayerController playerController;
-  final Widget? loadingWidget;
-  final Widget? errorWidget;
+  final MediaLoader videoLoader;
+  final BetterPlayerController? playerController;
+  final Widget? loader;
+  final Widget? errorView;
 
   const VideoContentView({
     super.key,
-    required this.videoLoadState,
+    required this.videoLoader,
     required this.playerController,
-    this.loadingWidget,
-    this.errorWidget,
+    required this.loader,
+    required this.errorView,
   });
+
+  bool get _isPlayerReady {
+    return playerController != null &&
+        playerController!.videoPlayerController?.value.initialized == true;
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (videoLoadState == LoadStatus.success &&
-        playerController.videoPlayerController!.value.initialized) {
-      return Center(
-        child: AspectRatio(
-          aspectRatio:
-              playerController.videoPlayerController!.value.aspectRatio,
-          child: BetterPlayer(controller: playerController),
-        ),
-      );
-    } else if (videoLoadState == LoadStatus.loading) {
-      return Center(
-        child:
-            loadingWidget ??
-            const SizedBox(
-              width: 70,
-              height: 70,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                strokeWidth: 3,
+    switch (videoLoader.status) {
+      case LoadStatus.loading:
+        return Center(
+          child:
+              loader ??
+              const SizedBox(
+                width: 70,
+                height: 70,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 3,
+                ),
               ),
-            ),
-      );
-    } else if (videoLoadState == LoadStatus.failure) {
-      return Center(
-        child:
-            errorWidget ??
-            const Text(
-              "Media failed to load.",
-              style: TextStyle(color: Colors.white),
-            ),
-      );
+        );
+      case LoadStatus.success:
+        return _isPlayerReady
+            ? Center(
+                child: AspectRatio(
+                  aspectRatio: playerController!
+                      .videoPlayerController!
+                      .value
+                      .aspectRatio,
+                  child: BetterPlayer(controller: playerController!),
+                ),
+              )
+            : SizedBox.shrink();
+      case LoadStatus.failure:
+        return Center(
+          child:
+              errorView ??
+              const Text(
+                "Video failed to load",
+                style: TextStyle(color: Colors.white),
+              ),
+        );
     }
-    return const SizedBox.shrink();
   }
 }
