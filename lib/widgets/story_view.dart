@@ -49,6 +49,7 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   Timer? _debounceTimer;
   StreamSubscription<PlaybackState>? _playbackSubscription;
   VerticalDragInfo? _verticalDragInfo;
+  bool _isAnimationControllerListenerAttached = false;
 
   int _currentIndex = 0;
 
@@ -66,7 +67,6 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
     if (firstUnseenIndex == -1) {
       // All seen, start from 0 and reset flags
-      _currentIndex = 0;
       for (var item in widget.storyItems) {
         item.isSeenBefore = false;
       }
@@ -78,53 +78,57 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
       }
     }
 
-    _subscribeToController();
+    _setupStoryControllerSubscription();
     _play();
   }
 
-  void _subscribeToController() {
-    _playbackSubscription = widget.controller.playbackNotifier.listen((status) {
-      switch (status) {
-        case PlaybackState.play:
-          _cancelDebouncer();
-          _animationController?.forward();
-          break;
-        case PlaybackState.pause:
-          _startDebouncer();
-          _animationController?.stop(canceled: false);
-          break;
-        case PlaybackState.next:
-          _cancelDebouncer();
-          _goForward();
-          break;
-        case PlaybackState.previous:
-          _cancelDebouncer();
-          _goBack();
-          break;
-      }
-    });
+  void _setupStoryControllerSubscription() {
+    _playbackSubscription?.cancel();
+    _playbackSubscription = widget.controller.playbackNotifier.listen(
+      _storyControllerListener,
+    );
   }
 
-  // --- Playback Logic ---
+  void _storyControllerListener(PlaybackState status) {
+    switch (status) {
+      case PlaybackState.play:
+        _cancelDebouncer();
+        _animationController?.forward();
+        break;
+      case PlaybackState.pause:
+        _startDebouncer();
+        _animationController?.stop(canceled: false);
+        break;
+      case PlaybackState.next:
+        _cancelDebouncer();
+        _goNext();
+        break;
+      case PlaybackState.previous:
+        _cancelDebouncer();
+        _goBack();
+        break;
+    }
+  }
 
   void _play() {
-    _animationController?.dispose();
-
-    final storyItem = _currentStoryItem;
+    final StoryItem storyItem = _currentStoryItem;
 
     widget.onStoryShow?.call(storyItem, _currentIndex);
 
-    _animationController = AnimationController(
-      duration: storyItem.storyDuration,
-      vsync: this,
-    );
-
-    _animationController!.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        storyItem.isSeenBefore = true;
-        _goForward();
-      }
-    });
+    if (_animationController == null) {
+      _animationController = AnimationController(
+        duration: storyItem.storyDuration,
+        vsync: this,
+      );
+    } else {
+      _animationController!
+        ..duration = storyItem.storyDuration
+        ..reset();
+    }
+    if (!_isAnimationControllerListenerAttached) {
+      _isAnimationControllerListenerAttached = true;
+      _animationController!.addStatusListener(_animationControllerListener);
+    }
 
     _currentAnimation = Tween(
       begin: 0.0,
@@ -135,17 +139,15 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     widget.controller.play();
   }
 
-  void _goForward() {
-    if (_currentIndex != widget.storyItems.length - 1) {
-      _animationController?.stop();
-      // Mark current as seen before moving
-      _currentStoryItem.isSeenBefore = true;
+  void _animationControllerListener(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _goNext();
+    }
+  }
 
-      setState(() {
-        _currentIndex++;
-      });
-      _play();
-    } else {
+  void _goNext() {
+    final bool isLastItem = _currentIndex == widget.storyItems.length - 1;
+    if (isLastItem) {
       // Last item completed
       _currentStoryItem.isSeenBefore = true;
       _animationController?.animateTo(
@@ -153,11 +155,20 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
         duration: const Duration(milliseconds: 10),
       );
       _onComplete();
+    } else {
+      _animationController?.stop(canceled: false);
+      // Mark current as seen before moving
+      _currentStoryItem.isSeenBefore = true;
+
+      setState(() {
+        _currentIndex++;
+      });
+      _play();
     }
   }
 
   void _goBack() {
-    _animationController?.stop();
+    _animationController?.stop(canceled: false);
 
     if (_currentIndex == 0) {
       // If at first page, try to delegate to parent or restart
@@ -256,8 +267,10 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   void dispose() {
     WakelockPlus.disable();
     _cancelDebouncer();
+    _animationController?.removeStatusListener(_animationControllerListener);
     _animationController?.dispose();
     _playbackSubscription?.cancel();
+    _playbackSubscription = null;
     super.dispose();
   }
 }
