@@ -95,19 +95,12 @@ class _StoryViewPageState extends State<StoryViewPage> {
         itemCount: _getStories().length,
         itemBuilder: (context, index) {
           return StoryView(
-            indicatorHeight: 3,
-            indicatorColor: Colors.grey,
-            indicatorForegroundColor: Colors.orange,
-            indicatorMargin: const EdgeInsets.only(
-              top: 15,
-              right: 10,
-              left: 10,
-            ),
+            progressHeight: 3,
+            progressColor: Colors.grey,
+            progressActiveColor: Colors.orange,
+            progressMargin: const EdgeInsets.only(top: 15, right: 10, left: 10),
             controller: _storiesViewController,
             isRtl: !_isEnglishLocale(context),
-            buttonPadding: EdgeInsets.only(
-              top: 100 + MediaQuery.paddingOf(context).top,
-            ),
             onVerticalSwipeComplete: (direction) {
               if (direction == Direction.down) {
                 Navigator.pop(context);
