@@ -8,6 +8,8 @@ class StoryItem {
   final Widget view;
   final StoryItemType type;
   final String url;
+  final Widget? caption;
+  final Widget? header;
 
   StoryItem({
     required this.view,
@@ -15,6 +17,8 @@ class StoryItem {
     required this.type,
     required this.url,
     this.isSeenBefore = false,
+    required this.header,
+    required this.caption,
   });
 
   factory StoryItem.text({
@@ -27,6 +31,8 @@ class StoryItem {
     bool roundedBottom = false,
     EdgeInsetsGeometry? textOuterPadding,
     Duration? storyDuration,
+    Widget? caption,
+    Widget? header,
   }) {
     final bool isDark = backgroundColor.computeLuminance() < 0.5;
     final Color textColor = isDark ? Colors.white : Colors.black;
@@ -58,6 +64,8 @@ class StoryItem {
       storyDuration: storyDuration ?? const Duration(seconds: 3),
       type: StoryItemType.text,
       url: title,
+      caption: caption,
+      header: header,
     );
   }
 
@@ -66,33 +74,31 @@ class StoryItem {
     required StoryController controller,
     Key? key,
     BoxFit imageFit = BoxFit.fitWidth,
-    Widget? caption,
-    Widget? header,
     bool isSeenBefore = false,
     Map<String, String>? requestHeaders,
     Widget? loadingWidget,
     Widget? errorWidget,
     Duration storyDuration = defaultStoryDuration,
+    Widget? caption,
+    Widget? header,
   }) {
     return StoryItem(
-      view: _buildStoryView(
-        caption: caption,
-        header: header,
-        child: StoryImage(
-          key: key,
-          imageUrl: url,
-          controller: controller,
-          fit: imageFit,
-          loader: loadingWidget,
-          errorView: errorWidget,
-          storyDuration: storyDuration,
-          requestHeaders: requestHeaders,
-        ),
+      view: StoryImage(
+        key: key,
+        imageUrl: url,
+        controller: controller,
+        fit: imageFit,
+        loader: loadingWidget,
+        errorView: errorWidget,
+        storyDuration: storyDuration,
+        requestHeaders: requestHeaders,
       ),
       isSeenBefore: isSeenBefore,
       storyDuration: storyDuration,
       type: StoryItemType.image,
       url: url,
+      caption: caption,
+      header: header,
     );
   }
 
@@ -109,46 +115,21 @@ class StoryItem {
     Widget? errorWidget,
   }) {
     return StoryItem(
-      view: _buildStoryView(
-        caption: caption,
-        header: header,
-        child: StoryVideo(
-          storyController: controller,
-          key: key,
-          loader: loadingWidget,
-          errorView: errorWidget,
-          videoUrl: url,
-          storyDuration: storyDuration,
-          requestHeaders: requestHeaders,
-        ),
+      view: StoryVideo(
+        storyController: controller,
+        key: key,
+        loader: loadingWidget,
+        errorView: errorWidget,
+        videoUrl: url,
+        storyDuration: storyDuration,
+        requestHeaders: requestHeaders,
       ),
       isSeenBefore: isSeenBefore,
       storyDuration: storyDuration,
       type: StoryItemType.video,
       url: url,
-    );
-  }
-
-  static Widget _buildStoryView({
-    required Widget child,
-    Widget? caption,
-    Widget? header,
-  }) {
-    return Container(
-      color: Colors.black,
-      child: Stack(
-        children: <Widget>[
-          child,
-          if (header != null)
-            SafeArea(
-              child: Align(alignment: Alignment.topCenter, child: header),
-            ),
-          if (caption != null)
-            SafeArea(
-              child: Align(alignment: Alignment.bottomCenter, child: caption),
-            ),
-        ],
-      ),
+      caption: caption,
+      header: header,
     );
   }
 }

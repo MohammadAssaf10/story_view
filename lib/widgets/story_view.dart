@@ -1,14 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:story_view/widgets/story_overlay.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../controller/story_controller.dart';
-import '../utils/enum.dart';
-import '../utils/page_data.dart';
-import '../utils/utils.dart';
-import 'page_bar.dart';
-import 'story_item.dart';
+import '../../story_view.dart';
 
 class StoryView extends StatefulWidget {
   final List<StoryItem> storyItems;
@@ -17,14 +13,11 @@ class StoryView extends StatefulWidget {
   final Function(Direction?)? onVerticalSwipeComplete;
   final void Function(StoryItem storyItem, int index)? onStoryShow;
   final ProgressPosition progressPosition;
-  final bool repeat;
-  final bool inline;
-  final Color? indicatorColor;
-  final Color? indicatorForegroundColor;
-  final double indicatorHeight;
-  final EdgeInsetsGeometry indicatorMargin;
+  final Color? progressColor;
+  final Color? progressActiveColor;
+  final double progressHeight;
+  final EdgeInsetsGeometry progressMargin;
   final bool isRtl;
-  final EdgeInsetsGeometry buttonPadding;
   final VoidCallback? onMoveToPreviousPage;
 
   const StoryView({
@@ -36,14 +29,11 @@ class StoryView extends StatefulWidget {
     this.onVerticalSwipeComplete,
     this.onMoveToPreviousPage,
     this.progressPosition = ProgressPosition.top,
-    this.repeat = false,
-    this.inline = false,
     this.isRtl = false,
-    this.indicatorColor,
-    this.indicatorForegroundColor,
-    this.indicatorHeight = 5,
-    this.buttonPadding = EdgeInsets.zero,
-    this.indicatorMargin = const EdgeInsets.symmetric(
+    this.progressColor,
+    this.progressActiveColor,
+    this.progressHeight = 5,
+    this.progressMargin = const EdgeInsets.symmetric(
       horizontal: 16,
       vertical: 8,
     ),
@@ -113,15 +103,6 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
           break;
       }
     });
-  }
-
-  @override
-  void dispose() {
-    WakelockPlus.disable();
-    _cancelDebouncer();
-    _animationController?.dispose();
-    _playbackSubscription?.cancel();
-    super.dispose();
   }
 
   // --- Playback Logic ---
@@ -201,16 +182,6 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   void _onComplete() {
     widget.controller.pause();
     widget.onComplete?.call();
-
-    if (widget.repeat) {
-      for (var it in widget.storyItems) {
-        it.isSeenBefore = false;
-      }
-      setState(() {
-        _currentIndex = 0;
-      });
-      _play();
-    }
   }
 
   // --- Debouncer Logic (for long press/pause) ---
@@ -225,125 +196,68 @@ class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {});
   }
 
-  // --- UI Building ---
-
   @override
   Widget build(BuildContext context) {
     if (widget.storyItems.isEmpty) return const SizedBox.shrink();
 
     return Stack(
       children: <Widget>[
-        // 1. The Story Content
-        _buildStoryView(),
-
-        // 2. The Progress Bars
-        if (widget.progressPosition != ProgressPosition.none)
-          _buildIndicators(),
-
-        // 3. Gesture Detectors (Overlay)
-        _wrapWithVerticalSwipe(child: _buildGestures()),
+        KeyedSubtree(
+          key: ValueKey(_currentIndex),
+          child: _currentStoryItem.view,
+        ),
+        StoryOverlay(
+          header: _currentStoryItem.header,
+          caption: _currentStoryItem.caption,
+          progress: Padding(
+            padding: widget.progressMargin,
+            child: PageBar(
+              widget.storyItems
+                  .map((it) => PageData(it.storyDuration, it.isSeenBefore))
+                  .toList(),
+              _currentAnimation,
+              indicatorHeight: widget.progressHeight,
+              indicatorColor: widget.progressColor,
+              indicatorForegroundColor: widget.progressActiveColor,
+              isRtl: widget.isRtl,
+            ),
+          ),
+          progressPosition: widget.progressPosition,
+          onTapDown: (_) => widget.controller.pause(),
+          onTapCancel: () => widget.controller.play(),
+          onTapUp: (_, isPrevious) {
+            if (_debounceTimer?.isActive == false) {
+              widget.controller.play();
+            } else {
+              if (isPrevious) {
+                widget.controller.previous();
+              } else {
+                widget.controller.next();
+              }
+            }
+          },
+          onVerticalDragUpdate: (details) {
+            _verticalDragInfo ??= VerticalDragInfo();
+            _verticalDragInfo!.update(details.primaryDelta!);
+          },
+          onVerticalDragEnd: (_) {
+            widget.controller.play();
+            if (_verticalDragInfo != null && !(_verticalDragInfo!.cancel)) {
+              widget.onVerticalSwipeComplete!(_verticalDragInfo!.direction);
+            }
+            _verticalDragInfo = null;
+          },
+        ),
       ],
     );
   }
 
-  Widget _buildStoryView() {
-    return KeyedSubtree(
-      key: ValueKey(_currentIndex),
-      child: _currentStoryItem.view,
-    );
-  }
-
-  Widget _buildIndicators() {
-    return Align(
-      alignment: widget.progressPosition == ProgressPosition.top
-          ? Alignment.topCenter
-          : Alignment.bottomCenter,
-      child: SafeArea(
-        bottom: widget.inline ? false : true,
-        child: Container(
-          padding: widget.indicatorMargin,
-          child: PageBar(
-            widget.storyItems
-                .map((it) => PageData(it.storyDuration, it.isSeenBefore))
-                .toList(),
-            _currentAnimation,
-            indicatorHeight: widget.indicatorHeight,
-            indicatorColor: widget.indicatorColor,
-            indicatorForegroundColor: widget.indicatorForegroundColor,
-            isRtl: widget.isRtl,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGestures() {
-    return Padding(
-      padding: widget.buttonPadding,
-      child: Column(
-        children: [
-          Expanded(
-            child: Row(
-              children: [
-                // Previous / Left Side
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTapDown: (_) => widget.controller.pause(),
-                    onTapCancel: () => widget.controller.play(),
-                    onTapUp: (_) {
-                      if (_debounceTimer?.isActive == false) {
-                        widget.controller.play();
-                      } else {
-                        widget.controller.previous();
-                      }
-                    },
-                  ),
-                ),
-                // Next / Right Side
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTapDown: (_) => widget.controller.pause(),
-                    onTapCancel: () => widget.controller.play(),
-                    onTapUp: (_) {
-                      if (_debounceTimer?.isActive == false) {
-                        widget.controller.play();
-                      } else {
-                        widget.controller.next();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-    // Note: Swiping logic was removed from the simplified Row above for clarity.
-    // If vertical swipe is strictly needed alongside taps, wrap the whole Row
-    // in the Vertical Swipe Gesture Detector below.
-  }
-
-  Widget _wrapWithVerticalSwipe({Widget? child}) {
-    if (widget.onVerticalSwipeComplete == null) return SizedBox.shrink();
-
-    return GestureDetector(
-      onVerticalDragStart: (_) => widget.controller.pause(),
-      onVerticalDragCancel: () => widget.controller.play(),
-      onVerticalDragUpdate: (details) {
-        _verticalDragInfo ??= VerticalDragInfo();
-        _verticalDragInfo!.update(details.primaryDelta!);
-      },
-      onVerticalDragEnd: (_) {
-        widget.controller.play();
-        if (_verticalDragInfo != null && !(_verticalDragInfo!.cancel)) {
-          widget.onVerticalSwipeComplete!(_verticalDragInfo!.direction);
-        }
-        _verticalDragInfo = null;
-      },
-      child: child,
-    );
+  @override
+  void dispose() {
+    WakelockPlus.disable();
+    _cancelDebouncer();
+    _animationController?.dispose();
+    _playbackSubscription?.cancel();
+    super.dispose();
   }
 }
