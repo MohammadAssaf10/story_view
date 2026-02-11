@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../utils/page_data.dart';
 import 'story_progress_indicator.dart';
 
-/// Horizontal bar displaying a row of [StoryProgressIndicator] based on the
-/// [pages] provided.
 class PageBar extends StatelessWidget {
   final List<PageData> pages;
   final Animation<double>? animation;
@@ -16,10 +14,10 @@ class PageBar extends StatelessWidget {
     this.pages,
     this.animation, {
     super.key,
-    this.isRtl = false, // Added default
-    this.indicatorHeight = 5,
-    this.indicatorColor,
-    this.indicatorForegroundColor,
+    required this.isRtl,
+    required this.indicatorHeight,
+    required this.indicatorColor,
+    required this.indicatorForegroundColor,
   });
 
   double _getSpacing(int count) {
