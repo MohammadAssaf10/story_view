@@ -5,7 +5,6 @@ export 'controller/story_controller.dart';
 export 'utils/utils.dart';
 export 'utils/enum.dart';
 export 'utils/media_loader.dart';
-export 'utils/video_loader.dart';
 export 'utils/page_data.dart';
 export 'widgets/page_bar.dart';
 export 'widgets/story_item.dart';
