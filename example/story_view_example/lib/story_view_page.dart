@@ -56,6 +56,25 @@ class _StoryViewPageState extends State<StoryViewPage> {
             isLiked: false,
             likesCount: 0,
           ),
+          SubStory(
+            id: 3,
+            type: MediaType.video,
+            original:
+                'https://fra1.digitaloceanspaces.com/moalem/al_moalem/production/20805/image_picker_7FBAB971-7581-4524-A022-BC79DD74D4B2-22955-000009BFECE119E8M---R1.mp4',
+            isViewedBefore: false,
+            durationInMilliseconds: 15040,
+            isLiked: false,
+            likesCount: 0,
+          ),
+          SubStory(
+            id: 4,
+            type: MediaType.video,
+            original: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
+            isViewedBefore: false,
+            durationInMilliseconds: 52000,
+            isLiked: false,
+            likesCount: 0,
+          ),
         ],
       ),
     ];
@@ -131,14 +150,14 @@ class _StoryViewPageState extends State<StoryViewPage> {
                           //   storyController: _storiesViewController,
                           // ),
                         )
-                      : StoryItem.pageVideo(
-                          story.original,
+                      : StoryItem.video(
+                          url: story.original,
                           controller: _storiesViewController,
                           isSeenBefore: story.isViewedBefore,
+                          loadingWidget: _Loader(),
                           storyDuration: Duration(
                             milliseconds: story.durationInMilliseconds ?? 10000,
                           ),
-                          loadingWidget: _Loader(),
                           // header: StoryHeader(
                           //   story: widget.stories[index],
                           //   subStory: story,

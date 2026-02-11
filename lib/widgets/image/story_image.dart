@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:story_view/story_view.dart';
 
-import '../../utils/media_loader.dart';
 import 'image_content_view.dart';
 
 class StoryImage extends StatefulWidget {
@@ -18,10 +17,10 @@ class StoryImage extends StatefulWidget {
     required this.imageUrl,
     required this.controller,
     required this.storyDuration,
-    this.fit,
-    this.loader,
-    this.errorView,
-    this.requestHeaders,
+    required this.fit,
+    required this.loader,
+    required this.errorView,
+    required this.requestHeaders,
   });
 
   @override
@@ -40,6 +39,9 @@ class _StoryImageState extends State<StoryImage> {
       requestHeaders: widget.requestHeaders,
       storyDuration: widget.storyDuration,
       storyController: widget.controller,
+      onError: () {
+        setState(() {});
+      },
       onLoaded: () {
         if (!mounted) return;
         setState(() {
@@ -55,8 +57,8 @@ class _StoryImageState extends State<StoryImage> {
       child: ImageContentView(
         imageLoader: _imageLoader,
         fit: widget.fit,
-        loadingWidget: widget.loader,
-        errorWidget: widget.errorView,
+        loader: widget.loader,
+        errorView: widget.errorView,
       ),
     );
   }
