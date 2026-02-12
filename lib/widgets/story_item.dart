@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../story_view.dart';
+import '../flutter_story_view.dart';
 
 class StoryItem {
   final Duration storyDuration;

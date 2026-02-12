@@ -1,6 +1,6 @@
 export 'widgets/image/story_image.dart';
 export 'widgets/video/story_video.dart';
-export 'widgets/story_view.dart';
+export 'widgets/flutter_story_view.dart';
 export 'controller/story_controller.dart';
 export 'utils/utils.dart';
 export 'utils/enum.dart';

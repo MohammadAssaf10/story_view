@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:story_view/story_view.dart';
 
 import 'story.dart';
 import 'sub_story.dart';
+import 'package:flutter_story_view/flutter_story_view.dart';
 
 class StoryViewPage extends StatefulWidget {
   final int storyIndex;
@@ -84,7 +84,7 @@ class _StoryViewPageState extends State<StoryViewPage> {
         controller: _storiesPageController,
         itemCount: _getStories().length,
         itemBuilder: (context, index) {
-          return StoryView(
+          return FlutterStoryView(
             progressHeight: 3,
             progressColor: Colors.grey,
             progressActiveColor: Colors.orange,

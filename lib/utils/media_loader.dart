@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-import '../story_view.dart';
+import '../flutter_story_view.dart';
 
 class MediaLoader {
   final String mediaUrl;

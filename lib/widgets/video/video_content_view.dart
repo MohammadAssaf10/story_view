@@ -1,7 +1,7 @@
 import 'package:better_player_plus/better_player_plus.dart';
 import 'package:flutter/material.dart';
 
-import '../../story_view.dart';
+import '../../flutter_story_view.dart';
 
 class VideoContentView extends StatelessWidget {
   final MediaLoader videoLoader;

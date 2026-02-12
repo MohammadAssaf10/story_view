@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:story_view/utils/enum.dart';
+import '../flutter_story_view.dart';
 
 class StoryOverlay extends StatelessWidget {
   final Widget? caption;

@@ -2,7 +2,7 @@
 
 A Flutter package that lets you easily create beautiful, interactive story views similar to social media apps like Instagram, WhatsApp, and Facebook.
 
-[![pub package](https://img.shields.io/pub/v/story_view.svg)](https://pub.dev/packages/story_view)
+[![pub package](https://img.shields.io/pub/v/flutter_story_view.svg)](https://pub.dev/packages/flutter_story_view)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Screenshots
@@ -34,7 +34,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  story_view: ^1.0.0
+  flutter_story_view: ^1.0.0
 ```
 
 Then run:
@@ -49,7 +49,7 @@ flutter pub get
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:story_view/story_view.dart';
+import 'package:flutter_story_view/flutter_story_view.dart';
 
 class StoryScreen extends StatefulWidget {
   @override
@@ -68,7 +68,7 @@ class _StoryScreenState extends State<StoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StoryView(
+      body: FlutterStoryView(
         storyItems: [
           StoryItem.image(
             url: 'https://example.com/image1.jpg',
@@ -162,7 +162,7 @@ StoryItem.text(
 ### Progress Indicators
 
 ```dart
-StoryView(
+FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
   progressPosition: ProgressPosition.top, // or ProgressPosition.bottom or ProgressPosition.none
@@ -176,7 +176,7 @@ StoryView(
 ### RTL Support
 
 ```dart
-StoryView(
+FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
   isRtl: true, // Enable right-to-left layout
@@ -213,7 +213,7 @@ controller.dispose();
 Called when all stories are finished:
 
 ```dart
-StoryView(
+FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
   onComplete: () {
@@ -228,7 +228,7 @@ StoryView(
 Called when a specific story is shown:
 
 ```dart
-StoryView(
+FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
   onStoryShow: (storyItem, index) {
@@ -242,7 +242,7 @@ StoryView(
 Called when user swipes vertically:
 
 ```dart
-StoryView(
+FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
   onVerticalSwipeComplete: (direction) {
@@ -260,7 +260,7 @@ StoryView(
 Called when trying to go back from the first story:
 
 ```dart
-StoryView(
+FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
   onMoveToPreviousPage: () {
@@ -287,7 +287,7 @@ PageView.builder(
   controller: pageController,
   itemCount: stories.length,
   itemBuilder: (context, index) {
-    return StoryView(
+    return FlutterStoryView(
       controller: storyController,
       storyItems: stories[index].items,
       onComplete: () {
@@ -393,7 +393,7 @@ Created by [Mohammad Assaf](https://github.com/MohammadAssaf10)
 
 ## Issues and Feedback
 
-Please file issues, bugs, or feature requests in our [issue tracker](https://github.com/MohammadAssaf10/story_view/issues).
+Please file issues, bugs, or feature requests in our [issue tracker](https://github.com/MohammadAssaf10/flutter_story_view/issues).
 
 ## Changelog
 

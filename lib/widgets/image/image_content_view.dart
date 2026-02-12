@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../story_view.dart';
+import '../../flutter_story_view.dart';
 
 class ImageContentView extends StatelessWidget {
   final MediaLoader imageLoader;

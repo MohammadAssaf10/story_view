@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:story_view/widgets/story_overlay.dart';
+import 'package:flutter_story_view/widgets/story_overlay.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../../story_view.dart';
+import '../flutter_story_view.dart';
 
-class StoryView extends StatefulWidget {
+class FlutterStoryView extends StatefulWidget {
   final List<StoryItem> storyItems;
   final StoryController controller;
   final VoidCallback? onComplete;
@@ -20,7 +20,7 @@ class StoryView extends StatefulWidget {
   final bool isRtl;
   final VoidCallback? onMoveToPreviousPage;
 
-  const StoryView({
+  const FlutterStoryView({
     super.key,
     required this.storyItems,
     required this.controller,
@@ -40,10 +40,10 @@ class StoryView extends StatefulWidget {
   });
 
   @override
-  State<StoryView> createState() => _StoryViewState();
+  State<FlutterStoryView> createState() => _FlutterStoryViewState();
 }
 
-class _StoryViewState extends State<StoryView> with TickerProviderStateMixin {
+class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProviderStateMixin {
   AnimationController? _animationController;
   Animation<double>? _currentAnimation;
   Timer? _debounceTimer;
