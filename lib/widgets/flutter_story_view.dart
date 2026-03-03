@@ -43,7 +43,8 @@ class FlutterStoryView extends StatefulWidget {
   State<FlutterStoryView> createState() => _FlutterStoryViewState();
 }
 
-class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProviderStateMixin {
+class _FlutterStoryViewState extends State<FlutterStoryView>
+    with TickerProviderStateMixin {
   AnimationController? _animationController;
   Animation<double>? _currentAnimation;
   Timer? _debounceTimer;
@@ -77,9 +78,8 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
         widget.storyItems[i].isSeenBefore = i < _currentIndex;
       }
     }
-
     _setupStoryControllerSubscription();
-    _play();
+    _initiatePlay();
   }
 
   void _setupStoryControllerSubscription() {
@@ -110,10 +110,17 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
     }
   }
 
-  void _play() {
+  void _initiatePlay() {
     final StoryItem storyItem = _currentStoryItem;
 
     widget.onStoryShow?.call(storyItem, _currentIndex);
+
+    // Remove listener temporarily to avoid triggering during reset
+    if (_isAnimationControllerListenerAttached &&
+        _animationController != null) {
+      _animationController!.removeStatusListener(_animationControllerListener);
+      _isAnimationControllerListenerAttached = false;
+    }
 
     if (_animationController == null) {
       _animationController = AnimationController(
@@ -121,10 +128,13 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
         vsync: this,
       );
     } else {
+      _animationController!.stop(canceled: false);
       _animationController!
         ..duration = storyItem.storyDuration
         ..reset();
     }
+
+    // Add listener after reset to avoid race conditions
     if (!_isAnimationControllerListenerAttached) {
       _isAnimationControllerListenerAttached = true;
       _animationController!.addStatusListener(_animationControllerListener);
@@ -134,9 +144,6 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
       begin: 0.0,
       end: 1.0,
     ).animate(_animationController!);
-
-    // Notify controller we are playing
-    widget.controller.play();
   }
 
   void _animationControllerListener(AnimationStatus status) {
@@ -163,7 +170,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
       setState(() {
         _currentIndex++;
       });
-      _play();
+      _initiatePlay();
     }
   }
 
@@ -177,7 +184,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
       } else {
         // Restart current story
         _currentStoryItem.isSeenBefore = false;
-        _play();
+        _initiatePlay();
       }
     } else {
       // Move to previous
@@ -186,7 +193,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView> with TickerProvider
         _currentIndex--;
         _currentStoryItem.isSeenBefore = false;
       });
-      _play();
+      _initiatePlay();
     }
   }
 
