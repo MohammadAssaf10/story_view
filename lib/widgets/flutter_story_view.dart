@@ -90,13 +90,18 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
         .listen(_storyControllerListener);
   }
 
-  /// Resets all [isSeenBefore] flags and restarts playback from the beginning.
+  /// Resumes playback from where the user left off.
+  /// Clamps [_currentIndex] to the new list length if needed.
   void _resetAndPlay() {
-    _currentIndex = 0;
-    for (var item in widget.storyItems) {
-      item.isSeenBefore = false;
+    // Clamp to valid range in case the new list is shorter.
+    _currentIndex = _currentIndex.clamp(0, widget.storyItems.length - 1);
+
+    // Ensure consistency: items before current are seen, current and after are not.
+    for (int i = 0; i < widget.storyItems.length; i++) {
+      widget.storyItems[i].isSeenBefore = i < _currentIndex;
     }
-    _initiatePlay();
+
+    _initiatePlay(reset: false);
   }
 
   @override
@@ -136,7 +141,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
     }
   }
 
-  void _initiatePlay() {
+  void _initiatePlay({bool reset = true}) {
     final StoryItem storyItem = _currentStoryItem;
 
     widget.onStoryShow?.call(storyItem, _currentIndex);
@@ -155,9 +160,13 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
       );
     } else {
       _animationController!.stop(canceled: false);
-      _animationController!
-        ..duration = storyItem.storyDuration
-        ..reset();
+      if (reset) {
+        _animationController!
+          ..duration = storyItem.storyDuration
+          ..reset();
+      } else {
+        _animationController!.duration = storyItem.storyDuration;
+      }
     }
 
     // Add listener after reset to avoid race conditions
