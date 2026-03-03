@@ -84,9 +84,35 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
 
   void _setupStoryControllerSubscription() {
     _playbackSubscription?.cancel();
-    _playbackSubscription = widget.controller.playbackNotifier.listen(
-      _storyControllerListener,
-    );
+    // Skip any already-buffered value from BehaviorSubject by starting fresh.
+    _playbackSubscription = widget.controller.playbackNotifier
+        .skip(widget.controller.playbackNotifier.hasValue ? 1 : 0)
+        .listen(_storyControllerListener);
+  }
+
+  /// Resets all [isSeenBefore] flags and restarts playback from the beginning.
+  void _resetAndPlay() {
+    _currentIndex = 0;
+    for (var item in widget.storyItems) {
+      item.isSeenBefore = false;
+    }
+    _initiatePlay();
+  }
+
+  @override
+  void didUpdateWidget(FlutterStoryView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Controller changed → re-subscribe.
+    if (oldWidget.controller != widget.controller) {
+      _setupStoryControllerSubscription();
+    }
+
+    // Story list changed (different reference or different length) → full reset.
+    if (oldWidget.storyItems != widget.storyItems ||
+        oldWidget.storyItems.length != widget.storyItems.length) {
+      _resetAndPlay();
+    }
   }
 
   void _storyControllerListener(PlaybackState status) {
@@ -144,6 +170,8 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
       begin: 0.0,
       end: 1.0,
     ).animate(_animationController!);
+
+    _animationController!.forward();
   }
 
   void _animationControllerListener(AnimationStatus status) {
