@@ -14,6 +14,7 @@ class StoryVideo extends StatefulWidget {
   final Widget? errorView;
   final Duration storyDuration;
   final Map<String, String>? requestHeaders;
+  final void Function(LoadStatus)? onLoadStatusChanged;
 
   const StoryVideo({
     super.key,
@@ -23,6 +24,7 @@ class StoryVideo extends StatefulWidget {
     required this.loader,
     required this.errorView,
     required this.requestHeaders,
+    this.onLoadStatusChanged,
   });
 
   @override
@@ -44,10 +46,12 @@ class _StoryVideoState extends State<StoryVideo> {
       mediaUrl: widget.videoUrl,
       onLoaded: () {
         if (!mounted) return;
+        widget.onLoadStatusChanged?.call(LoadStatus.success);
         _initializeVideo();
         _setupStoryListener();
       },
       onError: () {
+        widget.onLoadStatusChanged?.call(LoadStatus.failure);
         setState(() {});
       },
       storyController: widget.storyController,

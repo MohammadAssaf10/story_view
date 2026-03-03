@@ -11,6 +11,7 @@ class StoryImage extends StatefulWidget {
   final Widget? errorView;
   final Duration storyDuration;
   final Map<String, String>? requestHeaders;
+  final void Function(LoadStatus)? onLoadStatusChanged;
 
   const StoryImage({
     super.key,
@@ -21,6 +22,7 @@ class StoryImage extends StatefulWidget {
     required this.loader,
     required this.errorView,
     required this.requestHeaders,
+    this.onLoadStatusChanged,
   });
 
   @override
@@ -40,10 +42,12 @@ class _StoryImageState extends State<StoryImage> {
       storyDuration: widget.storyDuration,
       storyController: widget.controller,
       onError: () {
+        widget.onLoadStatusChanged?.call(LoadStatus.failure);
         setState(() {});
       },
       onLoaded: () {
         if (!mounted) return;
+        widget.onLoadStatusChanged?.call(LoadStatus.success);
         setState(() {
           widget.controller.play();
         });

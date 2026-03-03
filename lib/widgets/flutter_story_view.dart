@@ -211,7 +211,8 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
       _animationController?.stop(canceled: false);
       // Mark current as seen before moving
       _currentStoryItem.isSeenBefore = true;
-      if (_completedNaturally) {
+      if (_completedNaturally &&
+          _currentStoryItem.loadStatus == LoadStatus.success) {
         widget.onStoryItemComplete?.call(_currentStoryItem, _currentIndex);
       }
       _completedNaturally = false;

@@ -10,6 +10,7 @@ class StoryItem {
   final String url;
   final Widget? caption;
   final Widget? header;
+  LoadStatus loadStatus;
 
   StoryItem({
     required this.view,
@@ -19,7 +20,12 @@ class StoryItem {
     this.isSeenBefore = false,
     required this.header,
     required this.caption,
-  });
+    LoadStatus? loadStatus,
+  }) : loadStatus =
+           loadStatus ??
+           (type == StoryItemType.text
+               ? LoadStatus.success
+               : LoadStatus.loading);
 
   factory StoryItem.text({
     required String title,
@@ -82,7 +88,8 @@ class StoryItem {
     Widget? caption,
     Widget? header,
   }) {
-    return StoryItem(
+    late final StoryItem item;
+    item = StoryItem(
       view: StoryImage(
         key: key,
         imageUrl: url,
@@ -92,6 +99,7 @@ class StoryItem {
         errorView: errorWidget,
         storyDuration: storyDuration,
         requestHeaders: requestHeaders,
+        onLoadStatusChanged: (status) => item.loadStatus = status,
       ),
       isSeenBefore: isSeenBefore,
       storyDuration: storyDuration,
@@ -100,6 +108,7 @@ class StoryItem {
       caption: caption,
       header: header,
     );
+    return item;
   }
 
   factory StoryItem.video({
@@ -114,7 +123,8 @@ class StoryItem {
     Widget? loadingWidget,
     Widget? errorWidget,
   }) {
-    return StoryItem(
+    late final StoryItem item;
+    item = StoryItem(
       view: StoryVideo(
         storyController: controller,
         key: key,
@@ -123,6 +133,7 @@ class StoryItem {
         videoUrl: url,
         storyDuration: storyDuration,
         requestHeaders: requestHeaders,
+        onLoadStatusChanged: (status) => item.loadStatus = status,
       ),
       isSeenBefore: isSeenBefore,
       storyDuration: storyDuration,
@@ -131,5 +142,6 @@ class StoryItem {
       caption: caption,
       header: header,
     );
+    return item;
   }
 }
