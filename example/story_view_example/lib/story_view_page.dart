@@ -104,7 +104,7 @@ class _StoryViewPageState extends State<StoryViewPage> {
                     );
                   }
                 : null,
-            onComplete: () {
+            onAllStoriesComplete: () {
               if (index < _getStories().length - 1) {
                 _storiesPageController.nextPage(
                   duration: const Duration(milliseconds: 400),

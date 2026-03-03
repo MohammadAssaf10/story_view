@@ -91,7 +91,7 @@ class _StoryScreenState extends State<StoryScreen> {
           ),
         ],
         controller: _controller,
-        onComplete: () {
+        onAllStoriesComplete: () {
           Navigator.pop(context);
         },
         onVerticalSwipeComplete: (direction) {
@@ -216,7 +216,7 @@ Called when all stories are finished:
 FlutterStoryView(
   storyItems: storyItems,
   controller: controller,
-  onComplete: () {
+  onAllStoriesComplete: () {
     print('All stories completed');
     Navigator.pop(context);
   },
@@ -290,7 +290,7 @@ PageView.builder(
     return FlutterStoryView(
       controller: storyController,
       storyItems: stories[index].items,
-      onComplete: () {
+      onAllStoriesComplete: () {
         if (index < stories.length - 1) {
           pageController.nextPage(
             duration: Duration(milliseconds: 300),

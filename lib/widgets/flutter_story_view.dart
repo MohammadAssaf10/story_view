@@ -9,7 +9,8 @@ import '../flutter_story_view.dart';
 class FlutterStoryView extends StatefulWidget {
   final List<StoryItem> storyItems;
   final StoryController controller;
-  final VoidCallback? onComplete;
+  final VoidCallback? onAllStoriesComplete;
+  final void Function(StoryItem storyItem, int index)? onStoryItemComplete;
   final Function(Direction?)? onVerticalSwipeComplete;
   final void Function(StoryItem storyItem, int index)? onStoryShow;
   final ProgressPosition progressPosition;
@@ -24,8 +25,9 @@ class FlutterStoryView extends StatefulWidget {
     super.key,
     required this.storyItems,
     required this.controller,
-    this.onComplete,
+    this.onAllStoriesComplete,
     this.onStoryShow,
+    this.onStoryItemComplete,
     this.onVerticalSwipeComplete,
     this.onMoveToPreviousPage,
     this.progressPosition = ProgressPosition.top,
@@ -51,6 +53,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
   StreamSubscription<PlaybackState>? _playbackSubscription;
   VerticalDragInfo? _verticalDragInfo;
   bool _isAnimationControllerListenerAttached = false;
+  bool _completedNaturally = false;
 
   int _currentIndex = 0;
 
@@ -185,6 +188,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
 
   void _animationControllerListener(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
+      _completedNaturally = true;
       _goNext();
     }
   }
@@ -194,6 +198,10 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
     if (isLastItem) {
       // Last item completed
       _currentStoryItem.isSeenBefore = true;
+      if (_completedNaturally) {
+        widget.onStoryItemComplete?.call(_currentStoryItem, _currentIndex);
+      }
+      _completedNaturally = false;
       _animationController?.animateTo(
         1.0,
         duration: const Duration(milliseconds: 10),
@@ -203,6 +211,10 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
       _animationController?.stop(canceled: false);
       // Mark current as seen before moving
       _currentStoryItem.isSeenBefore = true;
+      if (_completedNaturally) {
+        widget.onStoryItemComplete?.call(_currentStoryItem, _currentIndex);
+      }
+      _completedNaturally = false;
 
       setState(() {
         _currentIndex++;
@@ -236,7 +248,7 @@ class _FlutterStoryViewState extends State<FlutterStoryView>
 
   void _onComplete() {
     widget.controller.pause();
-    widget.onComplete?.call();
+    widget.onAllStoriesComplete?.call();
   }
 
   // --- Debouncer Logic (for long press/pause) ---
